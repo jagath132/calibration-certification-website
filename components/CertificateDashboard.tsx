@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { StoredCertificate, getAllCertificates, deleteCertificate, saveCertificate } from '../utils/storage';
 import { CertificateData, INITIAL_DATA } from '../types';
-import { FileText, Plus, Trash2, Edit2, Search, X, FolderOpen, Calendar, User, Hash, Sparkles } from 'lucide-react';
+import { FileText, Plus, Trash2, Edit2, Search, X, FolderOpen, Calendar, User, Hash, Sparkles, ArrowLeft } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 interface Props {
     onLoadCertificate: (data: CertificateData) => void;
     onNewCertificate: () => void;
+    onBack: () => void;
 }
 
-const CertificateDashboard: React.FC<Props> = ({ onLoadCertificate, onNewCertificate }) => {
+const CertificateDashboard: React.FC<Props> = ({ onLoadCertificate, onNewCertificate, onBack }) => {
     const [certificates, setCertificates] = useState<StoredCertificate[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -97,14 +98,24 @@ const CertificateDashboard: React.FC<Props> = ({ onLoadCertificate, onNewCertifi
                                     </div>
                                 </div>
                             </div>
-                            <button
-                                onClick={onNewCertificate}
-                                className="group flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold text-sm hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30 hover:-translate-y-0.5 active:translate-y-0"
-                                aria-label="Create new certificate"
-                            >
-                                <Plus size={20} className="group-hover:rotate-90 transition-transform duration-300" />
-                                <span>New Certificate</span>
-                            </button>
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={onBack}
+                                    className="flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-slate-900 font-bold text-sm transition-all bg-white border border-slate-200 rounded-xl shadow-sm hover:bg-slate-50"
+                                    aria-label="Back to dashboard"
+                                >
+                                    <ArrowLeft size={18} />
+                                    <span>Back</span>
+                                </button>
+                                <button
+                                    onClick={onNewCertificate}
+                                    className="group flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold text-sm hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30 hover:-translate-y-0.5 active:translate-y-0"
+                                    aria-label="Create new certificate"
+                                >
+                                    <Plus size={20} className="group-hover:rotate-90 transition-transform duration-300" />
+                                    <span>New Certificate</span>
+                                </button>
+                            </div>
                         </div>
 
                         {/* Stats Bar */}
