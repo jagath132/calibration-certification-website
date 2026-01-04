@@ -1,0 +1,6 @@
+node_modules
+dist
+.env.local
+.git
+*.pdf
+ilovepdf_pages-to-jpg
