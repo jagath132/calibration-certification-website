@@ -1,7 +1,7 @@
 import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
 import { CertificateData } from '../types';
-import { calculateError } from '../utils/calculations';
+import { calculateError, calculatePercentageError, calculateAverageError } from '../utils/calculations';
 
 // Calculate today's date for 'Date of Issue' or use default
 const formatDate = (date: string) => date ? new Date(date).toLocaleDateString('en-GB') : '-';
@@ -209,7 +209,7 @@ const PageLayout = ({ children, data, pageNum }: { children: React.ReactNode, da
                     </View>
                 </View>
 
-                <Text style={styles.pageNumber}>Format No: ANC/F/01 | Page {pageNum} of 3</Text>
+                <Text style={styles.pageNumber}>Format No: ANC/F/01 | Page {pageNum} of 4</Text>
             </View>
         </View>
     </Page>
@@ -454,6 +454,76 @@ const PDFDocument: React.FC<Props> = ({ data }) => (
             </View>
 
             <Text style={{ textAlign: 'center', fontFamily: 'Helvetica-Bold', fontSize: 10, marginTop: 15 }}>*** END OF CERTIFICATE ***</Text>
+        </PageLayout>
+
+        {/* Page 4 - Annexure */}
+        <PageLayout data={data} pageNum={4}>
+            <View style={styles.section}>
+                <Text style={{ textAlign: 'center', fontFamily: 'Helvetica-Bold', fontSize: 14, textDecoration: 'underline', marginBottom: 10 }}>ANNEXURE REPORT</Text>
+                <Text style={{ textAlign: 'center', fontSize: 8, marginBottom: 15, textTransform: 'uppercase' }}>(Supplementary Data Sheet)</Text>
+
+                {/* Info Block */}
+                <View style={[styles.gridBox, { marginBottom: 15 }]}>
+                    <View style={styles.row}>
+                        <Text style={[styles.cellLabel, { width: '25%' }]}>Cert No</Text>
+                        <Text style={[styles.cellValue, { width: '75%' }]}>{data.certificateNumber}</Text>
+                    </View>
+                    <View style={styles.row}>
+                        <Text style={[styles.cellLabel, { width: '25%' }]}>Customer</Text>
+                        <Text style={[styles.cellValue, { width: '75%' }]}>{data.customer.name}</Text>
+                    </View>
+                    <View style={styles.lastRow}>
+                        <Text style={[styles.cellLabel, { width: '25%' }]}>Instrument</Text>
+                        <Text style={[styles.cellValue, { width: '75%' }]}>{data.instrument.description} (Make: {data.instrument.make}, Model: {data.instrument.model})</Text>
+                    </View>
+                </View>
+
+                <Text style={{ textAlign: 'center', fontFamily: 'Helvetica-Bold', fontSize: 10, textDecoration: 'underline', marginBottom: 8 }}>LINEARITY & HYSTERESIS DATA</Text>
+
+                {/* Annexure Table */}
+                <View style={styles.table}>
+                    <View style={styles.tableHeader}>
+                        <Text style={[styles.tableCell, { width: '14%' }]}>Load</Text>
+                        <Text style={[styles.tableCell, { width: '17%' }]}>Loading Indication</Text>
+                        <Text style={[styles.tableCell, { width: '17%' }]}>Unloading Indication</Text>
+                        <Text style={[styles.tableCell, { width: '17%' }]}>Loading Error %</Text>
+                        <Text style={[styles.tableCell, { width: '17%' }]}>Unloading Error %</Text>
+                        <Text style={[styles.lastTableCell, { width: '18%' }]}>Avg Error %</Text>
+                    </View>
+                    {data.annexureRows.map((row, i) => {
+                        const lErr = calculatePercentageError(row.loading, row.deadWeight);
+                        const uErr = calculatePercentageError(row.unloading, row.deadWeight);
+                        const avg = calculateAverageError(lErr, uErr);
+                        return (
+                            <View key={row.id} style={[styles.tableRow, i === data.annexureRows.length - 1 ? { borderBottom: 'none' } : {}]}>
+                                <Text style={[styles.tableCell, { width: '14%', fontFamily: 'Helvetica-Bold' }]}>{row.deadWeight}</Text>
+                                <Text style={[styles.tableCell, { width: '17%' }]}>{row.loading}</Text>
+                                <Text style={[styles.tableCell, { width: '17%' }]}>{row.unloading}</Text>
+                                <Text style={[styles.tableCell, { width: '17%', fontSize: 7 }]}>{lErr}</Text>
+                                <Text style={[styles.tableCell, { width: '17%', fontSize: 7 }]}>{uErr}</Text>
+                                <Text style={[styles.lastTableCell, { width: '18%', fontFamily: 'Helvetica-Bold' }]}>{avg}</Text>
+                            </View>
+                        );
+                    })}
+                </View>
+                <View style={{ marginTop: 5, padding: 3, border: '1px solid #000', borderTop: 'none' }}>
+                    <Text style={{ textAlign: 'right', fontFamily: 'Helvetica-Bold', fontSize: 7, paddingRight: 8 }}>
+                        Combined Variance (Average): {data.combinedVariance}
+                    </Text>
+                </View>
+
+                {/* Conclusion Block */}
+                <View style={[styles.remarks, { marginTop: 15 }]}>
+                    <View style={{ marginBottom: 5 }}>
+                        <Text style={{ fontFamily: 'Helvetica-Bold', textDecoration: 'underline' }}>Traceability Reference: </Text>
+                        <Text>{data.masterEquipments[0]?.description} ({data.masterEquipments[0]?.traceability})</Text>
+                    </View>
+                    <View>
+                        <Text style={{ fontFamily: 'Helvetica-Bold', textDecoration: 'underline' }}>Conclusion: </Text>
+                        <Text>The instrument performance is within the acceptable error limit of {data.acceptableError}.</Text>
+                    </View>
+                </View>
+            </View>
         </PageLayout>
     </Document>
 );
